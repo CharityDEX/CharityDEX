@@ -1,0 +1,4 @@
+[
+  "function donate() payable",
+  "function donateTo(address) payable"
+]

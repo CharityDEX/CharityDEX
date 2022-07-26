@@ -1,0 +1,22 @@
+[
+  {
+    "inputs": [],
+    "name": "donate",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address payable",
+        "name": "charityAddress",
+        "type": "address"
+      }
+    ],
+    "name": "donateTo",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  }
+]

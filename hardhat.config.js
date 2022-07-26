@@ -67,4 +67,14 @@ module.exports = {
       accounts: ACCOUNTS,
     },
   },
+  abiExporter: [
+    {
+      path: './abi/pretty',
+      pretty: true,
+    },
+    {
+      path: './abi/ugly',
+      pretty: false,
+    },
+  ]
 };
