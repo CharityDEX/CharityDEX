@@ -103,10 +103,18 @@ abstract contract V3SwapRouter is IV3SwapRouter, PeripheryPaymentsWithFeeExtende
     }
 
     /// @inheritdoc IV3SwapRouter
-    function exactInputSingle(ExactInputSingleParams memory params)
+    function exactInputSingle(ExactInputSingleParams calldata params)
         external
         payable
         override
+        returns (uint256 amountOut)
+    {
+        _exactInputSingle(params);
+    }
+
+    function _exactInputSingle(ExactInputSingleParams memory params)
+        internal
+        virtual
         returns (uint256 amountOut)
     {
         // use amountIn == Constants.CONTRACT_BALANCE as a flag to swap the entire balance of the contract
@@ -129,7 +137,11 @@ abstract contract V3SwapRouter is IV3SwapRouter, PeripheryPaymentsWithFeeExtende
     }
 
     /// @inheritdoc IV3SwapRouter
-    function exactInput(ExactInputParams memory params) external payable override returns (uint256 amountOut) {
+    function exactInput(ExactInputParams calldata params) external payable override returns (uint256 amountOut) {
+        _exactInput(params);
+    }
+
+    function _exactInput(ExactInputParams memory params) internal virtual returns (uint256 amountOut) {
         // use amountIn == Constants.CONTRACT_BALANCE as a flag to swap the entire balance of the contract
         bool hasAlreadyPaid;
         if (params.amountIn == Constants.CONTRACT_BALANCE) {
@@ -209,6 +221,14 @@ abstract contract V3SwapRouter is IV3SwapRouter, PeripheryPaymentsWithFeeExtende
         override
         returns (uint256 amountIn)
     {
+        _exactOutputSingle(params);
+    }
+
+    function _exactOutputSingle(ExactOutputSingleParams memory params)
+        internal
+        virtual
+        returns (uint256 amountIn)
+    {
         // avoid an SLOAD by using the swap return data
         amountIn = exactOutputInternal(
             params.amountOut,
@@ -223,7 +243,20 @@ abstract contract V3SwapRouter is IV3SwapRouter, PeripheryPaymentsWithFeeExtende
     }
 
     /// @inheritdoc IV3SwapRouter
-    function exactOutput(ExactOutputParams calldata params) external payable override returns (uint256 amountIn) {
+    function exactOutput(ExactOutputParams calldata params)
+        external
+        payable
+        override
+        returns (uint256 amountIn)
+    {
+        _exactOutput(params);
+    }
+
+    function _exactOutput(ExactOutputParams memory params)
+        internal
+        virtual
+        returns (uint256 amountIn)
+    {
         exactOutputInternal(
             params.amountOut,
             params.recipient,

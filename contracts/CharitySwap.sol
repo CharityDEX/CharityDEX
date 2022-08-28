@@ -2,43 +2,45 @@
 pragma solidity ^0.7.6;
 pragma abicoder v2;
 
-import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
+import "./swaprouter/SwapRouter02.sol";
 import "@uniswap/v3-periphery/contracts/interfaces/external/IWETH9.sol";
 import "@uniswap/v3-periphery/contracts/libraries/Path.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/ICharity.sol";
 
-contract CharitySwap {
+contract CharitySwap is V3SwapRouter, SwapRouter02 {
     using Path for bytes;
 
     uint constant public PRECISION = 1000000;
     uint24 constant public WETH_CONVERSION_FEE = 3000;
 
-    ISwapRouter public swapRouter;
-    IWETH9 public weth;
     ICharity public charity;
     uint public charityFee;
 
-    constructor(ISwapRouter _swapRouter, IWETH9 _weth, ICharity _charity, uint _charityFee) {
-        swapRouter = _swapRouter;
-        charityFee = _charityFee;
-        weth = _weth;
+    constructor(
+        address _factoryV2,
+        address factoryV3,
+        address _positionManager,
+        address _WETH9,
+        ICharity _charity,
+        uint _charityFee
+    ) SwapRouter02(_factoryV2, factoryV3, _positionManager, _WETH9) {
         charity = _charity;
+        charityFee = _charityFee;
     }
 
     /// @notice Swaps `amountIn` of one token for as much as possible of another token
     /// @param params The parameters necessary for the swap, encoded as `ExactInputSingleParams` in calldata
     /// @return amountOut The amount of the received token
-    function exactInputSingle(ISwapRouter.ExactInputSingleParams memory params)
-        external
-        payable
+    function _exactInputSingle(ExactInputSingleParams memory params)
+        internal
+        override
         returns (uint256 amountOut)
     {
         IERC20 tokenIn = IERC20(params.tokenIn);
         uint256 amountIn = params.amountIn;
 
         tokenIn.transferFrom(msg.sender, address(this), params.amountIn);
-        tokenIn.approve(address(swapRouter), amountIn);
 
         uint256 amountToDonate = (params.amountIn * charityFee) / PRECISION;
         uint256 adjustedAmountIn = amountIn - amountToDonate;
@@ -46,15 +48,15 @@ contract CharitySwap {
         _donateToken(address(tokenIn), amountToDonate);
 
         params.amountIn = adjustedAmountIn;
-        return swapRouter.exactInputSingle(params);
+        return super._exactInputSingle(params);
     }
 
     /// @notice Swaps `amountIn` of one token for as much as possible of another along the specified path
     /// @param params The parameters necessary for the multi-hop swap, encoded as `ExactInputParams` in calldata
     /// @return amountOut The amount of the received token
-    function exactInput(ISwapRouter.ExactInputParams memory params)
-        external
-        payable
+    function _exactInput(ExactInputParams memory params)
+        internal
+        override
         returns (uint256 amountOut)
     {
         (address tokenInAddress,,) = params.path.decodeFirstPool();
@@ -62,7 +64,6 @@ contract CharitySwap {
         uint256 amountIn = params.amountIn;
 
         tokenIn.transferFrom(msg.sender, address(this), params.amountIn);
-        tokenIn.approve(address(swapRouter), amountIn);
 
         uint256 amountToDonate = (params.amountIn * charityFee) / PRECISION;
         uint256 adjustedAmountIn = amountIn - amountToDonate;
@@ -70,22 +71,21 @@ contract CharitySwap {
         _donateToken(address(tokenIn), amountToDonate);
 
         params.amountIn = adjustedAmountIn;
-        return swapRouter.exactInput(params);
+        return super._exactInput(params);
     }
 
     /// @notice Swaps as little as possible of one token for `amountOut` of another token
     /// @param params The parameters necessary for the swap, encoded as `ExactOutputSingleParams` in calldata
     /// @return amountIn The amount of the input token
-    function exactOutputSingle(ISwapRouter.ExactOutputSingleParams memory params)
-        external
-        payable
+    function _exactOutputSingle(ExactOutputSingleParams memory params)
+        internal
+        override
         returns (uint256 amountIn)
     {
         IERC20 tokenIn = IERC20(params.tokenIn);
         
         uint256 msgSenderBalance = tokenIn.balanceOf(msg.sender);
         tokenIn.transferFrom(msg.sender, address(this), msgSenderBalance);
-        tokenIn.approve(address(swapRouter), msgSenderBalance);
 
         uint256 amountOut = params.amountOut;
         uint256 amountToDonate = (params.amountOut * charityFee) / PRECISION;
@@ -95,7 +95,7 @@ contract CharitySwap {
 
         params.amountOut = adjustedAmountOut;
         params.recipient = address(this);
-        swapRouter.exactOutputSingle(params);
+        super._exactOutputSingle(params);
 
         address tokenOut = params.tokenOut;
         _donateToken(tokenOut, amountToDonate);
@@ -109,9 +109,9 @@ contract CharitySwap {
     /// @notice Swaps as little as possible of one token for `amountOut` of another along the specified path (reversed)
     /// @param params The parameters necessary for the multi-hop swap, encoded as `ExactOutputParams` in calldata
     /// @return amountIn The amount of the input token
-    function exactOutput(ISwapRouter.ExactOutputParams memory params)
-        external
-        payable
+    function _exactOutput(ExactOutputParams memory params)
+        internal
+        override
         returns (uint256 amountIn)
     {
         (address tokenInAddress,,) = params.path.decodeFirstPool();
@@ -119,7 +119,6 @@ contract CharitySwap {
         
         uint256 msgSenderBalance = tokenIn.balanceOf(msg.sender);
         tokenIn.transferFrom(msg.sender, address(this), msgSenderBalance);
-        tokenIn.approve(address(swapRouter), msgSenderBalance);
 
         uint256 amountOut = params.amountOut;
         uint256 amountToDonate = (params.amountOut * charityFee) / PRECISION;
@@ -129,7 +128,7 @@ contract CharitySwap {
 
         params.amountOut = adjustedAmountOut;
         params.recipient = address(this);
-        swapRouter.exactOutput(params);
+        super._exactOutput(params);
 
         address tokenOut = _getTokenOut(params.path);
         _donateToken(tokenOut, amountToDonate);
@@ -141,12 +140,12 @@ contract CharitySwap {
     }
 
     function _donateToken(address token, uint amount) private {
-        if (token == address(weth)) {
-            weth.withdraw(amount);
+        if (token == WETH9) {
+            IWETH9(WETH9).withdraw(amount);
         } else {
             _swapForWeth(token, amount);
-            uint wethBalance = weth.balanceOf(address(this));
-            weth.withdraw(wethBalance);
+            uint wethBalance = IWETH9(WETH9).balanceOf(address(this));
+            IWETH9(WETH9).withdraw(wethBalance);
         }
 
         uint ethBalance = address(this).balance;
@@ -154,13 +153,12 @@ contract CharitySwap {
     }
 
     function _swapForWeth(address token, uint amount) private {
-        swapRouter.exactInputSingle(
-            ISwapRouter.ExactInputSingleParams(
+        super._exactInputSingle(
+            ExactInputSingleParams(
                 token,
-                address(weth),
+                WETH9,
                 WETH_CONVERSION_FEE,
                 address(this),
-                block.timestamp,
                 amount,
                 0,
                 0
