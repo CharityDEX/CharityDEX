@@ -1,15 +1,3 @@
-# Basic Sample Hardhat Project
+# Charity DEX
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, a sample script that deploys that contract, and an example of a task implementation, which simply lists the available accounts.
-
-Try running some of the following tasks:
-
-```shell
-npx hardhat accounts
-npx hardhat compile
-npx hardhat clean
-npx hardhat test
-npx hardhat node
-node scripts/sample-script.js
-npx hardhat help
-```
+Current test deployment - Goerli - 0xe8C8310f4476b99C6b82a84ed22Bfa461406B598
