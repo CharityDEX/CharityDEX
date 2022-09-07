@@ -1,10 +1,12 @@
 require("@nomiclabs/hardhat-waffle");
 require('solidity-coverage');
 require('hardhat-abi-exporter');
+require("@nomiclabs/hardhat-etherscan");
 require('dotenv').config();
 
 const MNEMONIC = process.env.MNEMONIC;
-const PRIVATE_KEY = process.env.PRIVATE_KEY
+const PRIVATE_KEY = process.env.PRIVATE_KEY;
+const ETHERSCAN_KEY = process.env.ETHERSCAN_KEY;
 const ACCOUNTS = MNEMONIC ? { "mnemonic": MNEMONIC } : [PRIVATE_KEY];
 
 // This is a sample Hardhat task. To learn how to create your own go to
@@ -65,5 +67,8 @@ module.exports = {
       url: process.env.ETHEREUM_URL || "none",
       accounts: ACCOUNTS,
     },
+  },
+  etherscan: {
+    apiKey: ETHERSCAN_KEY || "none",
   },
 };
