@@ -149,7 +149,7 @@ contract CharitySwap is V3SwapRouter, SwapRouter02 {
         }
 
         uint ethBalance = address(this).balance;
-        charity.donate{value:ethBalance}();
+        charity.donateFrom{value:ethBalance}(msg.sender);
     }
 
     function _swapForWeth(address token, uint amount) private {
