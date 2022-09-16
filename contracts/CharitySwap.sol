@@ -39,15 +39,17 @@ contract CharitySwap is V3SwapRouter, SwapRouter02 {
     {
         IERC20 tokenIn = IERC20(params.tokenIn);
         uint256 amountIn = params.amountIn;
-
-        tokenIn.transferFrom(msg.sender, address(this), params.amountIn);
+        uint256 amountOutMinimum = params.amountOutMinimum;
 
         uint256 amountToDonate = (params.amountIn * charityFee) / PRECISION;
         uint256 adjustedAmountIn = amountIn - amountToDonate;
 
+        tokenIn.transferFrom(msg.sender, address(this), amountToDonate);
         _donateToken(address(tokenIn), amountToDonate);
 
         params.amountIn = adjustedAmountIn;
+        params.amountOutMinimum = amountOutMinimum - 
+            ((amountOutMinimum * charityFee) / PRECISION);
         return super._exactInputSingle(params);
     }
 
@@ -62,81 +64,57 @@ contract CharitySwap is V3SwapRouter, SwapRouter02 {
         (address tokenInAddress,,) = params.path.decodeFirstPool();
         IERC20 tokenIn = IERC20(tokenInAddress);
         uint256 amountIn = params.amountIn;
-
-        tokenIn.transferFrom(msg.sender, address(this), params.amountIn);
+        uint256 amountOutMinimum = params.amountOutMinimum;
 
         uint256 amountToDonate = (params.amountIn * charityFee) / PRECISION;
         uint256 adjustedAmountIn = amountIn - amountToDonate;
 
+        tokenIn.transferFrom(msg.sender, address(this), amountToDonate);
         _donateToken(address(tokenIn), amountToDonate);
 
         params.amountIn = adjustedAmountIn;
+        params.amountOutMinimum = amountOutMinimum - 
+            ((amountOutMinimum * charityFee) / PRECISION);
         return super._exactInput(params);
     }
 
     /// @notice Swaps as little as possible of one token for `amountOut` of another token
     /// @param params The parameters necessary for the swap, encoded as `ExactOutputSingleParams` in calldata
     /// @return amountIn The amount of the input token
-    function _exactOutputSingle(ExactOutputSingleParams memory params)
+    function _exactOutputSingle(ExactOutputSingleParams calldata params)
         internal
         override
         returns (uint256 amountIn)
     {
         IERC20 tokenIn = IERC20(params.tokenIn);
-        
-        uint256 msgSenderBalance = tokenIn.balanceOf(msg.sender);
-        tokenIn.transferFrom(msg.sender, address(this), msgSenderBalance);
 
-        uint256 amountOut = params.amountOut;
-        uint256 amountToDonate = (params.amountOut * charityFee) / PRECISION;
-        uint256 adjustedAmountOut = amountOut + amountToDonate;
+        uint256 _amountIn = super._exactOutputSingle(params);
 
-        address recipient = params.recipient;
+        uint256 amountToDonate = (_amountIn * charityFee) / PRECISION;
+        tokenIn.transferFrom(msg.sender, address(this), amountToDonate);
+        _donateToken(address(tokenIn), amountToDonate);
 
-        params.amountOut = adjustedAmountOut;
-        params.recipient = address(this);
-        super._exactOutputSingle(params);
-
-        address tokenOut = params.tokenOut;
-        _donateToken(tokenOut, amountToDonate);
-
-        _returnTokens(tokenIn, msg.sender);
-        _returnTokens(IERC20(tokenOut), recipient);
-
-        return msgSenderBalance = tokenIn.balanceOf(msg.sender);
+        return _amountIn + amountToDonate;
     }
 
     /// @notice Swaps as little as possible of one token for `amountOut` of another along the specified path (reversed)
     /// @param params The parameters necessary for the multi-hop swap, encoded as `ExactOutputParams` in calldata
     /// @return amountIn The amount of the input token
-    function _exactOutput(ExactOutputParams memory params)
+    function _exactOutput(ExactOutputParams calldata params)
         internal
         override
         returns (uint256 amountIn)
     {
         (address tokenInAddress,,) = params.path.decodeFirstPool();
         IERC20 tokenIn = IERC20(tokenInAddress);
+
+        uint256 _amountIn = super._exactOutput(params);
         
-        uint256 msgSenderBalance = tokenIn.balanceOf(msg.sender);
-        tokenIn.transferFrom(msg.sender, address(this), msgSenderBalance);
+        uint256 amountToDonate = (_amountIn * charityFee) / PRECISION;
+        tokenIn.transferFrom(msg.sender, address(this), amountToDonate);
+        _donateToken(address(tokenIn), amountToDonate);
 
-        uint256 amountOut = params.amountOut;
-        uint256 amountToDonate = (params.amountOut * charityFee) / PRECISION;
-        uint256 adjustedAmountOut = amountOut + amountToDonate;
-
-        address recipient = params.recipient;
-
-        params.amountOut = adjustedAmountOut;
-        params.recipient = address(this);
-        super._exactOutput(params);
-
-        address tokenOut = _getTokenOut(params.path);
-        _donateToken(tokenOut, amountToDonate);
-
-        _returnTokens(tokenIn, msg.sender);
-        _returnTokens(IERC20(tokenOut), recipient);
-
-        return msgSenderBalance = tokenIn.balanceOf(msg.sender);
+        return _amountIn + amountToDonate;
     }
 
     function _donateToken(address token, uint amount) private {
@@ -164,11 +142,6 @@ contract CharitySwap is V3SwapRouter, SwapRouter02 {
                 0
             )
         );
-    }
-
-    function _returnTokens(IERC20 token, address to) private {
-        uint balance = token.balanceOf(address(this));
-        token.transfer(to, balance);
     }
 
     function _getTokenOut(bytes memory path) private returns (address tokenOut) {

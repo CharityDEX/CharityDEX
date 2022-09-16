@@ -2,6 +2,6 @@
 
 #### Current test deployment - Goerli:
 
-Charity - 0x724cd643ce19dCF89DE422105e66e71B8BA3a74c
+Charity - 0xAFe826D177F1E05264Ba6d8Dda820a2C46e4eFBD
 
-CharitySwap - 0xCc840c77EdEbff7bc4E78826aC5232422c325925
+CharitySwap - 0xF7a8B8AC9a9Bc988486D92FE4630418c8A3b6d17

@@ -224,7 +224,7 @@ abstract contract V3SwapRouter is IV3SwapRouter, PeripheryPaymentsWithFeeExtende
         _exactOutputSingle(params);
     }
 
-    function _exactOutputSingle(ExactOutputSingleParams memory params)
+    function _exactOutputSingle(ExactOutputSingleParams calldata params)
         internal
         virtual
         returns (uint256 amountIn)
@@ -252,7 +252,7 @@ abstract contract V3SwapRouter is IV3SwapRouter, PeripheryPaymentsWithFeeExtende
         _exactOutput(params);
     }
 
-    function _exactOutput(ExactOutputParams memory params)
+    function _exactOutput(ExactOutputParams calldata params)
         internal
         virtual
         returns (uint256 amountIn)
