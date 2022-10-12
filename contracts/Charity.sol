@@ -20,6 +20,14 @@ contract Charity is ERC1155, Ownable {
             charityMap[_charityAddresses[i]] = true;
         }
     }
+
+    function getCharityAddresses() public view returns (address payable[] memory addresses) {
+        return charityAddresses;
+    }
+
+    function uri(uint id) public view virtual override returns (string memory){
+        return string(abi.encodePacked(super.uri(id), tokenUri[id]));
+    }
     
     function donate() external payable { 
         donateFrom(msg.sender);
@@ -52,11 +60,6 @@ contract Charity is ERC1155, Ownable {
         _burn(msg.sender, TOKEN, price);
         _mint(msg.sender, id, count, "");    
     }
-    
-    function uri(uint id) public view virtual override returns (string memory){
-        return string(abi.encodePacked(super.uri(id), tokenUri[id]));
-    }
-
 
     function setCharityAddresses(address payable[] memory _charityAddresses) external onlyOwner {
         for (uint i=0; i < charityAddresses.length; i++) {

@@ -11,3 +11,6 @@ artifacts
 #Remix files
 .deps
 remix-compiler.config.js
+
+#VS code files
+.vscode
