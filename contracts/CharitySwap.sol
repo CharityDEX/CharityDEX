@@ -29,9 +29,17 @@ contract CharitySwap is SwapRouter02 {
         charityFee = _charityFee;
     }
 
-    function unwrapWETH9(uint256 amountMinimum) external payable override {
-        uint256 updatedAmountMinimum = amountMinimum - ((amountMinimum * charityFee) / PRECISION);
-        super.unwrapWETH9(updatedAmountMinimum, msg.sender);
+    function unwrapWETH9(uint256 amountMinimum, address recipient) external payable override {
+        super.unwrapWETH9(_decreaseByFee(amountMinimum), recipient);
+    }
+
+    function unwrapWETH9WithFee(
+        uint256 amountMinimum,
+        address recepient,
+        uint256 feeBips,
+        address feeRecipient
+    ) external payable override {
+        super.unwrapWETH9WithFee(_decreaseByFee(amountMinimum), recepient, feeBips, feeRecipient);
     }
 
     /// @notice Swaps `amountIn` of one token for as much as possible of another token
@@ -156,5 +164,9 @@ contract CharitySwap is SwapRouter02 {
             (, tokenOut,) = path.decodeFirstPool();
             return tokenOut;
         }
+    }
+
+    function _decreaseByFee(uint256 amount) private returns (uint256) {
+        return amount - ((amount * charityFee) / PRECISION);
     }
 }
