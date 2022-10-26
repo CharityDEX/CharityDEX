@@ -8,7 +8,7 @@ import "@uniswap/v3-periphery/contracts/libraries/Path.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/ICharity.sol";
 
-contract CharitySwap is V3SwapRouter, SwapRouter02 {
+contract CharitySwap is SwapRouter02 {
     using Path for bytes;
 
     uint constant public PRECISION = 1000000;
@@ -27,6 +27,11 @@ contract CharitySwap is V3SwapRouter, SwapRouter02 {
     ) SwapRouter02(_factoryV2, factoryV3, _positionManager, _WETH9) {
         charity = _charity;
         charityFee = _charityFee;
+    }
+
+    function unwrapWETH9(uint256 amountMinimum) external payable override {
+        uint256 updatedAmountMinimum = amountMinimum - ((amountMinimum * charityFee) / PRECISION);
+        super.unwrapWETH9(updatedAmountMinimum, msg.sender);
     }
 
     /// @notice Swaps `amountIn` of one token for as much as possible of another token
