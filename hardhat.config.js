@@ -29,7 +29,6 @@ task("deploy-test", "Deploys Charity and CharitySwap with default testnet parame
     const factoryV2 = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f";
     const factoryV3 = "0x1F98431c8aD98523631AE4a59f267346ea31F984";
     const positionManager = "0xC36442b4a4522E871399CD717aBDD847Ab11FE88";
-    const charityFee = 50000; // 5%
 
     const Charity = await ethers.getContractFactory("Charity");
     const charity = await Charity.deploy(charityAddresses, uri);
@@ -38,7 +37,7 @@ task("deploy-test", "Deploys Charity and CharitySwap with default testnet parame
     console.log("Charity deployed to:", charity.address);
 
     const CharitySwap = await ethers.getContractFactory("CharitySwap");
-    const charitySwap = await CharitySwap.deploy(factoryV2, factoryV3, positionManager, taskArgs.weth, charity.address, charityFee);
+    const charitySwap = await CharitySwap.deploy(factoryV2, factoryV3, positionManager, taskArgs.weth, charity.address);
     await charitySwap.deployTransaction.wait()
 
     console.log("CharitySwap deployed to:", charitySwap.address);

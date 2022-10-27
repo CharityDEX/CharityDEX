@@ -12,21 +12,19 @@ contract CharitySwap is SwapRouter02 {
     using Path for bytes;
 
     uint constant public PRECISION = 1000000;
+    uint constant public CHARITY_FEE = 50000; // 5%
     uint24 constant public WETH_CONVERSION_FEE = 3000;
 
     ICharity public charity;
-    uint public charityFee;
 
     constructor(
         address _factoryV2,
         address factoryV3,
         address _positionManager,
         address _WETH9,
-        ICharity _charity,
-        uint _charityFee
+        ICharity _charity
     ) SwapRouter02(_factoryV2, factoryV3, _positionManager, _WETH9) {
         charity = _charity;
-        charityFee = _charityFee;
     }
 
     function unwrapWETH9(uint256 amountMinimum, address recipient) external payable override {
@@ -54,7 +52,7 @@ contract CharitySwap is SwapRouter02 {
         uint256 amountIn = params.amountIn;
         uint256 amountOutMinimum = params.amountOutMinimum;
 
-        uint256 amountToDonate = (params.amountIn * charityFee) / PRECISION;
+        uint256 amountToDonate = (params.amountIn * CHARITY_FEE) / PRECISION;
         uint256 adjustedAmountIn = amountIn - amountToDonate;
 
         tokenIn.transferFrom(msg.sender, address(this), amountToDonate);
@@ -62,7 +60,7 @@ contract CharitySwap is SwapRouter02 {
 
         params.amountIn = adjustedAmountIn;
         params.amountOutMinimum = amountOutMinimum - 
-            ((amountOutMinimum * charityFee) / PRECISION);
+            ((amountOutMinimum * CHARITY_FEE) / PRECISION);
         return super._exactInputSingle(params);
     }
 
@@ -79,7 +77,7 @@ contract CharitySwap is SwapRouter02 {
         uint256 amountIn = params.amountIn;
         uint256 amountOutMinimum = params.amountOutMinimum;
 
-        uint256 amountToDonate = (params.amountIn * charityFee) / PRECISION;
+        uint256 amountToDonate = (params.amountIn * CHARITY_FEE) / PRECISION;
         uint256 adjustedAmountIn = amountIn - amountToDonate;
 
         tokenIn.transferFrom(msg.sender, address(this), amountToDonate);
@@ -87,7 +85,7 @@ contract CharitySwap is SwapRouter02 {
 
         params.amountIn = adjustedAmountIn;
         params.amountOutMinimum = amountOutMinimum - 
-            ((amountOutMinimum * charityFee) / PRECISION);
+            ((amountOutMinimum * CHARITY_FEE) / PRECISION);
         return super._exactInput(params);
     }
 
@@ -103,7 +101,7 @@ contract CharitySwap is SwapRouter02 {
 
         uint256 _amountIn = super._exactOutputSingle(params);
 
-        uint256 amountToDonate = (_amountIn * charityFee) / PRECISION;
+        uint256 amountToDonate = (_amountIn * CHARITY_FEE) / PRECISION;
         tokenIn.transferFrom(msg.sender, address(this), amountToDonate);
         _donateToken(address(tokenIn), amountToDonate);
 
@@ -123,7 +121,7 @@ contract CharitySwap is SwapRouter02 {
 
         uint256 _amountIn = super._exactOutput(params);
         
-        uint256 amountToDonate = (_amountIn * charityFee) / PRECISION;
+        uint256 amountToDonate = (_amountIn * CHARITY_FEE) / PRECISION;
         tokenIn.transferFrom(msg.sender, address(this), amountToDonate);
         _donateToken(address(tokenIn), amountToDonate);
 
@@ -172,6 +170,6 @@ contract CharitySwap is SwapRouter02 {
     }
 
     function _decreaseByFee(uint256 amount) private returns (uint256) {
-        return amount - ((amount * charityFee) / PRECISION);
+        return amount - ((amount * CHARITY_FEE) / PRECISION);
     }
 }
