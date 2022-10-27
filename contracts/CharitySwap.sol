@@ -132,7 +132,12 @@ contract CharitySwap is SwapRouter02 {
 
     function _donateToken(address token, uint amount) private {
         if (token == WETH9) {
-            IWETH9(WETH9).withdraw(amount);
+            // WETH or ETH swap
+            if (address(this).balance < amount) {
+                // WETH swap
+                IWETH9(WETH9).transferFrom(msg.sender, address(this), amount);
+                IWETH9(WETH9).withdraw(amount);
+            }
         } else {
             _swapForWeth(token, amount);
             uint wethBalance = IWETH9(WETH9).balanceOf(address(this));
