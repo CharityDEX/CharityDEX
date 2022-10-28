@@ -55,7 +55,6 @@ contract CharitySwap is SwapRouter02 {
         uint256 amountToDonate = (params.amountIn * CHARITY_FEE) / PRECISION;
         uint256 adjustedAmountIn = amountIn - amountToDonate;
 
-        tokenIn.transferFrom(msg.sender, address(this), amountToDonate);
         _donateToken(address(tokenIn), amountToDonate);
 
         params.amountIn = adjustedAmountIn;
@@ -80,7 +79,6 @@ contract CharitySwap is SwapRouter02 {
         uint256 amountToDonate = (params.amountIn * CHARITY_FEE) / PRECISION;
         uint256 adjustedAmountIn = amountIn - amountToDonate;
 
-        tokenIn.transferFrom(msg.sender, address(this), amountToDonate);
         _donateToken(address(tokenIn), amountToDonate);
 
         params.amountIn = adjustedAmountIn;
@@ -102,7 +100,6 @@ contract CharitySwap is SwapRouter02 {
         uint256 _amountIn = super._exactOutputSingle(params);
 
         uint256 amountToDonate = (_amountIn * CHARITY_FEE) / PRECISION;
-        tokenIn.transferFrom(msg.sender, address(this), amountToDonate);
         _donateToken(address(tokenIn), amountToDonate);
 
         return _amountIn + amountToDonate;
@@ -122,7 +119,6 @@ contract CharitySwap is SwapRouter02 {
         uint256 _amountIn = super._exactOutput(params);
         
         uint256 amountToDonate = (_amountIn * CHARITY_FEE) / PRECISION;
-        tokenIn.transferFrom(msg.sender, address(this), amountToDonate);
         _donateToken(address(tokenIn), amountToDonate);
 
         return _amountIn + amountToDonate;
