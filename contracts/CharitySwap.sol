@@ -156,15 +156,6 @@ contract CharitySwap is SwapRouter02 {
         );
     }
 
-    function _getTokenOut(bytes memory path) private returns (address tokenOut) {
-        if (path.hasMultiplePools()) {
-            return _getTokenOut(path.skipToken());
-        } else {
-            (, tokenOut,) = path.decodeFirstPool();
-            return tokenOut;
-        }
-    }
-
     function _decreaseByFee(uint256 amount) private returns (uint256) {
         return amount - ((amount * CHARITY_FEE) / PRECISION);
     }
