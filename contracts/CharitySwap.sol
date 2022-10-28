@@ -125,6 +125,8 @@ contract CharitySwap is SwapRouter02 {
     }
 
     function _donateToken(address token, uint amount) private {
+        uint amountToDonate = 0;
+
         if (token == WETH9) {
             // WETH or ETH swap
             if (address(this).balance < amount) {
@@ -132,18 +134,20 @@ contract CharitySwap is SwapRouter02 {
                 IWETH9(WETH9).transferFrom(msg.sender, address(this), amount);
                 IWETH9(WETH9).withdraw(amount);
             }
+            amountToDonate = amount;
         } else {
-            _swapForWeth(token, amount);
-            uint wethBalance = IWETH9(WETH9).balanceOf(address(this));
-            IWETH9(WETH9).withdraw(wethBalance);
+            amountToDonate = _swapForWeth(token, amount);
+            IWETH9(WETH9).withdraw(amountToDonate);
         }
 
-        uint ethBalance = address(this).balance;
-        charity.donateFrom{value:ethBalance}(msg.sender);
+        charity.donateFrom{value:amountToDonate}(msg.sender);
     }
 
-    function _swapForWeth(address token, uint amount) private {
-        super._exactInputSingle(
+    function _swapForWeth(
+        address token,
+        uint amount
+    ) private returns (uint256 wethOut) {
+        return super._exactInputSingle(
             ExactInputSingleParams(
                 token,
                 WETH9,
