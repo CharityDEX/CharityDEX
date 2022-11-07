@@ -43,22 +43,36 @@ task("deploy-test", "Deploys Charity and CharitySwap with default testnet parame
     console.log("CharitySwap deployed to:", charitySwap.address);
   });
 
-// task("deploy-all", "Deploys Charity and CharitySwap")
-//   .addParam("weth", "The WETH contract address")
-//   .addOptionalParam("charityAddresses", "The addresses donations are sent to")
-//   .addOptionalParam("uri", "The metadata URI")
-//   .addOptionalParam("charityFee", "The part of the swap that goes to charity")
-//   .setAction(async (taskArgs) => {
-//     await hre.run('compile');
+  task("deploy-prod", "Deploys Charity and CharitySwap with default production parameters")
+  .setAction(async (taskArgs) => {
+    await hre.run('compile');
 
-//     const charityFee = taskArgs.charityFee || process.env.CHARITY_FEE || 50000; // defaults to 5%
+    const charityAddresses = [
+      "0x546d012aa7f54afa701be51406902b2e57c000b7",
+      "0x7cF2eBb5Ca55A8bd671A020F8BDbAF07f60F26C1",
+      "0x897fe74d43CDA5003dB8917DFC53eA770D12ef71",
+      "0xc7D8F5f7bEfF6F69d97AFC3cE01196272E47E9B0",
+      "0xC61799b2604A2c4b34376BdAD040754031AC5822",
+      "0x530aCBD13f321984B8a04bdf63Df8749Dba5E8cf"
+    ];
+    const uri = "https://drive.google.com/uc?id=";
+    const factoryV2 = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f";
+    const factoryV3 = "0x1F98431c8aD98523631AE4a59f267346ea31F984";
+    const positionManager = "0xC36442b4a4522E871399CD717aBDD847Ab11FE88";
+    const weth = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
 
-//     const CharitySwap = await ethers.getContractFactory("CharitySwap");
-//     const charitySwap = await CharitySwap.deploy(taskArgs.factoryV2, taskArgs.factoryV3, taskArgs.positionManager, taskArgs.weth, taskArgs.charity, charityFee);
-//     await charitySwap.deployTransaction.wait()
+    const Charity = await ethers.getContractFactory("Charity");
+    const charity = await Charity.deploy(charityAddresses, uri);
+    await charity.deployTransaction.wait()
 
-//     console.log("CharitySwap deployed to:", charitySwap.address);
-//   });
+    console.log("Charity deployed to:", charity.address);
+
+    const CharitySwap = await ethers.getContractFactory("CharitySwap");
+    const charitySwap = await CharitySwap.deploy(factoryV2, factoryV3, positionManager, weth, charity.address);
+    await charitySwap.deployTransaction.wait()
+
+    console.log("CharitySwap deployed to:", charitySwap.address);
+  });
 
 const solidity089 = {
   version: "0.8.9",
