@@ -1,0 +1,55 @@
+.fondBtnContainer {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-block: 1rem;
+}
+
+.fondBtn {
+  background-color: #fff;
+  color: #7b5ec7;
+  font-size: 1rem;
+  border: 1px solid #7b5ec7;
+  cursor: pointer;
+  border-radius: 5rem;
+  padding: 0.5rem 1rem;
+  transition: 200ms;
+}
+
+.fondBtn:hover {
+  background-color: #eeeded;
+}
+
+.fondBtn[data-active='true'] {
+  background-color: #7b5ec7;
+  color: #fff;
+}
+
+.fondDescription {
+  background-color: #f2edff;
+  border-radius: 2rem;
+  padding: 2rem;
+  margin-block: 1rem;
+  font-weight: 400;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 2fr 1fr;
+}
+
+.fondDescriptionText {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.fondDescriptionText a {
+  color: #7b5ec7;
+}
+
+.fondDescription img {
+  border: 2px solid #7b5ec7;
+  max-width: 300;
+  width: 100%;
+  border-radius: 1rem;
+}

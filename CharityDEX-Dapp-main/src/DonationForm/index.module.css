@@ -1,0 +1,87 @@
+.card {
+  --font: 'Hanson', 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  margin-inline: auto;
+  padding: 3rem;
+  border-radius: 2rem;
+  background-color: #fff;
+  box-shadow: 0px 4px 30px 0px rgb(123 94 199 / 20%);
+  max-width: 700px;
+  color: #000742;
+  font-family: var(--font);
+}
+
+@media (max-width: 479px) {
+  .card {
+    padding-inline: 1rem;
+    padding-block: 2rem;
+  }
+}
+
+.header {
+  font-size: 2.5rem;
+  margin-block: 0 2rem;
+}
+
+.inputBlock {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  max-width: calc(100vw - 2rem);
+}
+
+.input {
+  border-radius: 5rem;
+  flex: 1;
+  height: 2rem;
+  outline: 1px solid #7b5ec7;
+  border: unset;
+  padding: 1rem;
+  font-family: var(--font);
+  font-size: 1rem;
+  color: #7b5ec7;
+  box-sizing: border-box;
+  min-width: 5ch;
+}
+
+.input[data-error='true'] {
+  outline: 1px solid #ff441f;
+}
+
+.donateBtn {
+  border: none;
+  border-radius: 5rem;
+  background-color: #ff795d;
+  color: #fff;
+  font-size: 1.2rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: 200ms;
+  white-space: nowrap;
+}
+
+.donateBtn[data-loading='true'] {
+  pointer-events: none;
+  padding-inline: 2em;
+}
+
+.donateBtn:disabled {
+  filter: contrast(0.5) brightness(1.5);
+  pointer-events: none;
+}
+
+.donateBtn:hover {
+  background-color: #ff441f;
+  transform: scale(1.025);
+}
+
+.error {
+  color: #ff441f;
+  margin: 0.5rem;
+  margin-bottom: -0.5rem;
+  transition: 200ms;
+  height: 20px;
+}
+
+.error:empty {
+  height: 0;
+}
